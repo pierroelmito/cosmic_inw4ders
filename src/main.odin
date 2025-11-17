@@ -198,6 +198,7 @@ make_hparticles :: proc "c" (pos: [2]i32, s: i32 = 1) {
 	add(&g.hparticles, Particle{pos, p(0, 200 * s) / 300, pf})
 	add(&g.hparticles, Particle{pos, p(-100, 100 * s) / 300, pf})
 	add(&g.hparticles, Particle{pos, p(100, 100 * s) / 300, pf})
+	w4.tone(740, 2, 20, w4.Tone_Channel.Triangle)
 }
 
 make_dparticles :: proc "c" (pos: [2]i32) {
@@ -208,6 +209,7 @@ make_dparticles :: proc "c" (pos: [2]i32) {
 	add(&g.dparticles, Particle{pos, p(0, -300) / 300, pf})
 	add(&g.dparticles, Particle{pos, p(-200, -200) / 300, pf})
 	add(&g.dparticles, Particle{pos, p(200, -200) / 300, pf})
+	w4.tone_complex(240, 100, {2, 5, 15, 0}, 32, w4.Tone_Channel.Noise)
 }
 
 drawStars :: proc "c" () {
@@ -259,6 +261,7 @@ update_ship :: proc "c" (o: ^PlayerShip) {
 	shoot :: proc "c" (o: ^PlayerShip, dy: i32) {
 		if (o.cd == 0 && g.pbullets.count < len(g.pbullets.items)) {
 			o.cd = 14
+			w4.tone(940, 2, 2, w4.Tone_Channel.Pulse1)
 			add(&g.pbullets, Bullet{o.pos - p(1, 0), p(0, dy), true})
 			add(&g.pbullets, Bullet{o.pos + p(1, 0), p(0, dy), true})
 		}
@@ -352,7 +355,7 @@ update_gameplay :: proc "c" (playerAlive: bool) {
 					e.hp -= 1
 					b.active = false
 					make_hparticles(b.pos, -b.speed[1] / abs(b.speed[1]))
-					if e.hp == 0 {
+					if e.hp <= 0 {
 						make_dparticles(e.cpos)
 						break
 					}
